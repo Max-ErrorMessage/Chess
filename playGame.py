@@ -36,13 +36,13 @@ def random_board_state(average_empty_squares=0):
         1, 1):
             continue
         new_board = ChessBoard(board_state)
-        is_check = new_board.checkCheck(whiteInCheck=True) or new_board.checkCheck(whiteInCheck=False)
+        is_check = new_board.check_check(white_in_check=True) or new_board.check_check(white_in_check=False)
         del new_board
         if not is_check:
             return board_state
 
 
-commonBoards = {"Panda End Game":
+common_boards = {"Panda End Game":
                     "    KA       PPPP   "
                     "                                                            "
                     "   pppp       ka    ",
