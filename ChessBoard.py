@@ -774,11 +774,11 @@ class ChessBoard:
             self.moves.append([start_position, end_position])
         self.check_check(not piece.is_white)
 
-    def check_check(self, whiteInCheck, checkDoubleHops=True):
+    def check_check(self, white_in_check, checkDoubleHops=True):
         """
         Checks if a given player is in check in the current position.
         """
-        king_positions = self.find_pieces(whiteInCheck, King)
+        king_positions = self.find_pieces(white_in_check, King)
         self.checked_positions = []
         if len(king_positions) == 0:
             return True
@@ -808,7 +808,7 @@ class ChessBoard:
                         board = ChessBoard(board_state=self.board_state(), white_to_move=square.is_white)
                         board.set_square_in_position(square.position, None)
                         board.set_square_in_position(move, newPiece)
-                        isCheck = board.check_check(whiteInCheck, checkDoubleHops=False)
+                        isCheck = board.check_check(white_in_check, checkDoubleHops=False)
                         del newPiece
                         del board
                         if isCheck:
@@ -816,13 +816,13 @@ class ChessBoard:
                             return True
         return False
 
-    def check_checkmate(self, whiteInCheck):
+    def check_checkmate(self, white_in_check):
         """
         Checks if a given player is in checkmate
         First checks that the player is in check, then if they are,
         check for how many moves the player has available to them. If they don't have any moves: return True
         """
-        if self.check_check(whiteInCheck):
+        if self.check_check(white_in_check):
             if len(self.legal_moves_for_every_piece()) == 0:
                 return True
         return False
@@ -843,14 +843,14 @@ class ChessBoard:
                 return True
         return False
 
-    def would_be_check(self, whiteInCheck, move):
+    def would_be_check(self, white_in_check, move):
         """
         Creates a new chessBoard object with the same board_state, makes the given move, and checks for check in the
         new ChessBoard object. Deleted the new object before returning.
         """
-        board = ChessBoard(self.board_state(), whiteInCheck)
+        board = ChessBoard(self.board_state(), white_in_check)
         board.move_piece(move[0], move[1])
-        would_be_check = board.check_check(whiteInCheck)
+        would_be_check = board.check_check(white_in_check)
         del board
         return would_be_check
 
@@ -1152,19 +1152,19 @@ class GameBoard(ChessBoard):
         self.screen.blit(text, text_rect)
         pygame.display.update()
 
-    def check_check(self, whiteInCheck, checkDoubleHops=True):
-        if super().check_check(whiteInCheck, checkDoubleHops):
+    def check_check(self, white_in_check, checkDoubleHops=True):
+        if super().check_check(white_in_check, checkDoubleHops):
             self.place_png('check.png', self.checked_positions)
             pygame.display.update()
             return True
         return False
 
-    def check_checkmate(self, whiteInCheck):
+    def check_checkmate(self, white_in_check):
         """
         Extends the check_checkmate method of the superclass to display victory if True
         """
-        if super().check_checkmate(whiteInCheck):
-            self.displayVictory(not whiteInCheck)
+        if super().check_checkmate(white_in_check):
+            self.displayVictory(not white_in_check)
 
     def scheck_stalemate(self):
         if super().scheck_stalemate():
