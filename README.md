@@ -55,7 +55,7 @@ Inheirits movement from pieces next to it (including enemy pieces)
 
 Has no movement without inheiriting anything.
 
-Inheritis special functions too: Double Moves after takes if next to a Dog, Brief Invulnerablity after caputres if next to a Panda
+Inherits special functions too: Double Moves after takes if next to a Dog, Brief invulnerablity after caputres if next to a Panda
 
 Lays an egg after a capturing a piece if inheiriting a Blob that duplicates upon capture
 
