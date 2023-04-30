@@ -68,7 +68,7 @@ More Compliacted Chess Game created with python using the pygame library, based 
 
 ## Board Layout
 The starting board layout is:
-
+```
 | BlackRook    || BlackDog     || BlackChicken || BlackBlob0   || BlackPanda   || BlackKing    || BlackCleric  || BlackFrog    || BlackDog     || BlackRook    |
 | BlackPawn    || BlackPawn    || BlackPawn    || BlackPawn    || BlackPawn    || BlackPawn    || BlackPawn    || BlackPawn    || BlackPawn    || BlackPawn    |
 |              ||              ||              ||              ||              ||              ||              ||              ||              ||              |
@@ -79,3 +79,4 @@ The starting board layout is:
 |              ||              ||              ||              ||              ||              ||              ||              ||              ||              |
 | WhitePawn    || WhitePawn    || WhitePawn    || WhitePawn    || WhitePawn    || WhitePawn    || WhitePawn    || WhitePawn    || WhitePawn    || WhitePawn    |
 | WhiteRook    || WhiteDog     || WhiteChicken || WhiteBlob0   || WhitePanda   || WhiteKing    || WhiteCleric  || WhiteFrog    || WhiteDog     || WhiteRook    |
+```
