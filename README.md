@@ -65,3 +65,17 @@ More Compliacted Chess Game created with python using the pygame library, based 
 - Double Move Pieces may not take a piece if there is no legal moves after taking the piece.
 
 - Pawns can en Passant any time a pawn skips a square that they would have been able to capture.
+
+## Board Layout
+The starting board layout is:
+
+| BlackRook    || BlackDog     || BlackChicken || BlackBlob0   || BlackPanda   || BlackKing    || BlackCleric  || BlackFrog    || BlackDog     || BlackRook    |
+| BlackPawn    || BlackPawn    || BlackPawn    || BlackPawn    || BlackPawn    || BlackPawn    || BlackPawn    || BlackPawn    || BlackPawn    || BlackPawn    |
+|              ||              ||              ||              ||              ||              ||              ||              ||              ||              |
+|              ||              ||              ||              ||              ||              ||              ||              ||              ||              |
+|              ||              ||              ||              ||              ||              ||              ||              ||              ||              |
+|              ||              ||              ||              ||              ||              ||              ||              ||              ||              |
+|              ||              ||              ||              ||              ||              ||              ||              ||              ||              |
+|              ||              ||              ||              ||              ||              ||              ||              ||              ||              |
+| WhitePawn    || WhitePawn    || WhitePawn    || WhitePawn    || WhitePawn    || WhitePawn    || WhitePawn    || WhitePawn    || WhitePawn    || WhitePawn    |
+| WhiteRook    || WhiteDog     || WhiteChicken || WhiteBlob0   || WhitePanda   || WhiteKing    || WhiteCleric  || WhiteFrog    || WhiteDog     || WhiteRook    |
