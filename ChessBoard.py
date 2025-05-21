@@ -22,7 +22,7 @@ class ChessBoard:
     """
 
     def __init__(self,
-                 board_state="RDOZAKCFDRPPPPPPPPPP                                                            pppppppppprdozakcfdr",
+                 board_state="RDOZAKBFDRPPPPPPPPPP                                                            pppppppppprdozakbfdr",
                  white_to_move=True):
         """
         The constructor takes 2 arguments:

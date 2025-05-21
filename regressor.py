@@ -1,26 +1,29 @@
 import ChessBoard as cb
 
-def minmax(boardstate, white_to_play):
+
+def minmax(boardstate, white_to_play, depth):
     board = cb.ChessBoard(boardstate, white_to_play)
-    available_states_1 = board.available_board_states()
-    best_opposing_moves = {}
-    for index, state_1 in enumerate(available_states_1):
-        board.set_board_state(state_1[0])
-        board.white_to_move = not white_to_play
-        available_states_2 = board.available_board_states()
-        states_results = {}
-        for state_2 in available_states_2:
-            board.set_board_state(state_2[0])
-            board.white_to_move = white_to_play
-            states_results[state_2[0]] = board.material_values
-        best_moves = sorted(states_results.items(), key=lambda x: x[1], reverse=True)
-        best_opposing_moves[state_1] = best_moves[0]
-        print(f'{index}/{len(available_states_1)}')
-    best_opposing_moves = sorted(best_opposing_moves.items(), key=lambda x: x[1])
-    print(best_opposing_moves)
+    available_states = board.available_board_states()
+    state_values = {}
+
+    if depth <= 1:
+        for state in available_states:
+            board.set_board_state(state[0])
+            material_value = board.material_values
+            state_values[state[0]] = material_value
+        state_values = sorted(state_values.items(), key=lambda x: x[1], reverse=not white_to_play)
+        return state_values[0]
+
+    for state in available_states:
+        lower = minmax(state[0], not white_to_play, depth - 1)
+        state_values[state[0]] = lower[1]
+    state_values = sorted(state_values.items(), key=lambda x: x[1], reverse=not white_to_play)
+    if depth % 2 == 0: state_values = state_values[0:int(len(state_values)/4)] # TODO: check that not all values are the same before split
+    return state_values[0]
+
 
 board = cb.ChessBoard()
-minmax(board.board_state(), board.white_to_move)
+out = minmax(board.board_state(), board.white_to_move, 4)
 
-
+print(out)
 
