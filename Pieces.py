@@ -13,6 +13,7 @@ class Piece:
         self.invulnerable = False
         self.is_en_passantable = False
         self.value = 0
+        self.feature_int = 0
 
     def game_value(self):
         """
@@ -92,6 +93,7 @@ class Pawn(Piece):
     def __init__(self, is_white, position):
         super().__init__(is_white, position)
         self.value = 1
+        self.feature_int = 1 + (17 if not is_white else 0)
 
     def moves(self):
         row, col = self.position
@@ -143,6 +145,7 @@ class Rook(Piece):
     def __init__(self, is_white, position):
         super().__init__(is_white, position)
         self.value = 5
+        self.feature_int = 2 + (17 if not is_white else 0)
 
     def direction_moves(self):
         return [("N", 10), ("E", 10), ("S", 10), ("W", 10)]
@@ -162,6 +165,7 @@ class Bishop(Piece):
     def __init__(self, is_white, position):
         super().__init__(is_white, position)
         self.value = 3
+        self.feature_int = 3 + (17 if not is_white else 0)
 
     def direction_moves(self):
         return [("NE", 10), ("SE", 10), ("SW", 10), ("NW", 10)]
@@ -180,7 +184,8 @@ class Bishop(Piece):
 class King(Piece):
     def __init__(self, is_white, position):
         super().__init__(is_white, position)
-        self.value = 10000
+        self.value = 0
+        self.feature_int = 4 + (17 if not is_white else 0)
 
     def moves(self):
         row, col = self.position
@@ -203,6 +208,7 @@ class Knight(Piece):
     def __init__(self, is_white, position):
         super().__init__(is_white, position)
         self.value = 3
+        self.feature_int = 5 + (17 if not is_white else 0)
 
     def string(self):
         return self.colour_case() + "Knight "
@@ -226,6 +232,7 @@ class Panda(Piece):
     def __init__(self, is_white, position):
         super().__init__(is_white, position)
         self.value = 3
+        self.feature_int = 6 + (17 if not is_white else 0)
 
     def string(self):
         return self.colour_case() + "Panda  "
@@ -282,6 +289,7 @@ class Frog(Piece):
     def __init__(self, is_white, position):
         super().__init__(is_white, position)
         self.value = 6
+        self.feature_int = 7 + (17 if not is_white else 0)
 
     def string(self):
         return self.colour_case() + "Frog   "
@@ -308,6 +316,7 @@ class Dog(Piece):
     def __init__(self, is_white, position):
         super().__init__(is_white, position)
         self.value = 10
+        self.feature_int = 8 + (17 if not is_white else 0)
 
     def string(self):
         return self.colour_case() + "Dog    "
@@ -331,6 +340,7 @@ class Blob0(Piece):
     def __init__(self, is_white, position):
         super().__init__(is_white, position)
         self.value = 8
+        self.feature_int = 9 + (17 if not is_white else 0)
 
     def string(self):
         return self.colour_case() + "Blob0  "
@@ -362,6 +372,7 @@ class Blob1(Piece):
     def __init__(self, is_white, position):
         super().__init__(is_white, position)
         self.value = 4
+        self.feature_int = 10 + (17 if not is_white else 0)
 
     def string(self):
         return self.colour_case() + "Blob1  "
@@ -381,6 +392,7 @@ class Blob2(Piece):
     def __init__(self, is_white, position):
         super().__init__(is_white, position)
         self.value = 2
+        self.feature_int = 11 + (17 if not is_white else 0)
 
     def string(self):
         return self.colour_case() + "Blob2  "
@@ -400,6 +412,7 @@ class Blob3(Piece):
     def __init__(self, is_white, position):
         super().__init__(is_white, position)
         self.value = 1
+        self.feature_int = 12 + (17 if not is_white else 0)
 
     def string(self):
         return self.colour_case() + "Blob3  "
@@ -419,6 +432,7 @@ class Cleric(Piece):
     def __init__(self, is_white, position):
         super().__init__(is_white, position)
         self.value = 5
+        self.feature_int = 2 + (17 if not is_white else 0)
 
     def direction_moves(self):
         return [("NE", 10), ("SE", 10), ("SW", 10), ("NW", 10)]
@@ -452,6 +466,7 @@ class Chicken(Piece):
     def __init__(self, is_white, position):
         super().__init__(is_white, position)
         self.value = 3
+        self.feature_int = 13 + (17 if not is_white else 0)
 
     def pawn_moves(self):
         row, col = self.position
@@ -562,6 +577,7 @@ class Egg(Piece):
         super().__init__(is_white, position)
         self.value = 1
         self.timeUntilHatch = 6
+        self.feature_int = 14 + int(self.timeUntilHatch / 2) + (17 if not is_white else 0)
 
     def string(self):
         return self.colour_case() + "Egg    "

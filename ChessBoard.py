@@ -1,4 +1,6 @@
 import random
+import numpy as np
+
 import pygame
 from Pieces import *
 
@@ -995,6 +997,31 @@ class ChessBoard:
         self.white_to_move = not self.white_to_move
         self.checked_positions = None
         self.victor = None
+
+    @property
+    def features(self):
+        features_arr = np.zeros(101)
+        i = 0
+        for row in self.squares:
+            for square in row:
+                if issubclass(type(square), Piece):
+                    features_arr[i] = square.feature_int
+                i+=1
+        features_arr[-1] = int(self.white_to_move)
+        return features_arr
+
+    @property
+    def material_values(self):
+        black, white = 0, 0
+        for row in self.squares:
+            for square in row:
+                if issubclass(type(square), Piece):
+                    if square.is_white:
+                        white += square.value
+                    else:
+                        black += square.value
+        return black - white
+
 
 
 class GameBoard(ChessBoard):
