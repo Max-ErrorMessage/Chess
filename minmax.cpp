@@ -4,10 +4,15 @@
 #include <algorithm>
 #include <vector>
 #include <map>
+#include <limits>
+
 
 using namespace std;
 
 std::string colour_from_bool(bool is_white) {
+    /*
+    * Turns a boolean colour identifier into a string representation of the colour
+    */
     if (is_white) {
         return "White";
     }
@@ -15,10 +20,16 @@ std::string colour_from_bool(bool is_white) {
 }
 
 std::string postostr(std::pair<int, int> pos) {
+    /*
+    * Turns a pair containing the position of a square on the board into a string representation of the position
+    */
     return "(" + std::to_string(pos.first) + ", " + std::to_string(pos.second) + ")";
 }
 
 bool pieces_in_vector(std::vector<std::string> vec, std::vector<std::string> items) {
+    /*
+    * TODO: Find out what this function does and why it does it
+    */
     for (std::string item : items) {
         for (std::string element : vec) {
             if (item == element) {
@@ -30,6 +41,9 @@ bool pieces_in_vector(std::vector<std::string> vec, std::vector<std::string> ite
 }
 
 bool position_in_vector(std::vector<std::pair<int, int>> vec, std::pair<int, int> pos) {
+    /*
+    * TODO: Find out what this function does and why it does it
+    */
     for (std::pair<int, int> it: vec) {
         if (it == pos) {
             return true;
@@ -39,6 +53,9 @@ bool position_in_vector(std::vector<std::pair<int, int>> vec, std::pair<int, int
 }
 
 bool char_in_str(std::string str, char chr) {
+    /*
+    * Checks for a character in a given string
+    */
     for (char current_char : str) {
         if (current_char == chr) {
             return true;
@@ -48,80 +65,177 @@ bool char_in_str(std::string str, char chr) {
 }
 
 int flip_ints(int num, bool is_white) {
+    /*
+    * Ensures integers have the correct sign for their colour
+    */
     if (!is_white) {
         return num * -1;
     }
     return num;
 }
 
-class Piece {
-    public:
-        bool is_white;
-        bool immortal;
-        bool has_moved;
-        bool en_passantable;
-        int time_until_hatch;
+std::pair<std::string, float> minimax(std::string boardstate, bool white_to_play, int depth) {
+    ChessBoard* board = new ChessBoard();
+    board->set_board_state(boardstate);
+    board->white_to_move = white_to_play;
 
-        Piece(bool is_white) {
+    std::vector<std::pair<std::pair<int, int>, std::pair<int, int>>> moves = board->all_legal_moves();
+
+    if (moves.empty() || depth == 0) {
+        float score = static_cast<float>(board->material_difference());
+        delete board;
+        return {boardstate, score};
+    }
+
+    std::pair<std::string, float> best_result;
+    float best_score = white_to_play ? -std::numeric_limits<float>::infinity()
+                                      :  std::numeric_limits<float>::infinity();
+
+    for (const auto& move : moves) {
+        ChessBoard* new_board = board->copy_board();
+        new_board->move_piece(move.first, move.second);
+
+        std::string new_state = new_board->board_state();
+        bool next_turn = !white_to_play;
+
+        std::pair<std::string, float> result = minimax(new_state, next_turn, depth - 1);
+
+        float score = result.second;
+
+        if ((white_to_play && score > best_score) || (!white_to_play && score < best_score)) {
+            best_score = score;
+            best_result = {new_state, score};
+        }
+
+        delete new_board;
+    }
+
+    delete board;
+    return best_result;
+}
+
+class Piece {
+    /*
+    * The Piece class stores base behaviour for all pieces
+    */
+    public:
+        bool is_white; // Tracks if the piece is black or white
+        bool immortal; // Tracks if the piece is currently immortal (in the case of the Panda)
+        bool has_moved; // Tracks if the piece has moved this game (for castling)
+        bool en_passantable; // Tracks if the piece has moved forwards in such a way that it could be en-passanted
+        int time_until_hatch; // Tracks how many moves remain until the 'hatch' even (for eggs)
+        int abs_value;
+
+        Piece(bool is_white, int value) {
+            // Generic constructor for pieces
             this -> is_white = is_white;
             immortal = false;
             has_moved = false;
             en_passantable = false;
             time_until_hatch = -1;
+            abs_value = value;
         }
 
         bool operator!=(const std::nullptr_t& null) const {
+            /*
+            * This code seems to me to be entirely useless and nonsensical, but I'm sure that If I remove ir or change it then the code will break
+            */
             return (this != nullptr);
         }
 
         virtual std::string name() const {
+            /*
+            * The name function returns a tring that represents the Piece - for displaying the piece on a string board
+            */
             return "Piece   ";
         }
 
         virtual int as_int() const {
+            /*
+            * Integer representations of pieces are the most efficient (and confusing!)
+            */
             return 0;
         }
         
         virtual std::vector<std::pair<int, int>> moves() const {
+            /*
+            * Returns a vector of all moves that the piece can make relative to where it is
+            * Note that in this case 'moves' is different to 'takes' (for the purposes of things such as pawns)
+            */
             return {};
         }
 
         virtual std::vector<std::pair<int, int>> takes() const {
+            /*
+            * Returns a vector of all 'takes' moves that the piece can make relative to where it is
+            */
             return moves();
         }
 
         virtual std::vector<std::pair<std::pair<int, int>, int>> direction_moves() const {
+            /*
+            * Returns a vector that contains the direction moves available. 
+            * Direction moves are 'sliding' moves that pieces such as the rook can perform.
+            * The direction comes in the form D, L
+            * The D is the directional component ({-1, 0}, {1, 1}, etc.)
+            * The L is the maximum limit to those moves (how much 'reach' the move has)
+            */
             return {};
         }
 
         virtual std::vector<std::pair<std::pair<int, int>, int>> direction_takes() const {
+            /*
+            * Returns a vector that contains the directional takes available.
+            */
             return direction_moves();
         }
 
         virtual std::vector<std::pair<std::pair<int, int>, std::pair<int, int>>> dependant_moves() const {
+            /*
+            * Returns a vector containing all dependant moves available.
+            * Dependant moves indicate a move that can be made provided another space is free
+            * Dependant moves contain 2 relative vectors, and the piece may move to the first vector if the second is empty.
+            */
             return {};
         }
 
         virtual std::vector<std::pair<std::pair<int, int>, std::pair<int, int>>> dependant_takes() const {
+            /*
+            * Returns a vector containing all dependant takes available
+            */
             return dependant_moves();
         }
 
         virtual void move() {
+            /*
+            * Tracks movement of pieces
+            */
             has_moved = true;
         }
 
         virtual void take() {
+            /*
+            * Tracks movement of pieces
+            */
             has_moved = true;
         }
 
-        virtual void tick() {}
+        virtual void tick() {} // Some pieces (the Egg) specifically care about game time so for the sake of simplicity each piece has a tick function
+
+        int value() {
+            if (is_white) {
+                return abs_value;
+            } 
+            return -abs_value;
+        }
+
 };
 
 class Pawn : public Piece {
     public:
-        int forwards;
+        int forwards; // Representation of which direction is 'forwards' for the pawn (who cares about the direction of the board)
 
-        Pawn(bool is_white) : Piece(is_white) {
+        Pawn(bool is_white) : Piece(is_white, 1) {
             this -> en_passantable = false;
             if (is_white) {
                 this -> forwards = -1;
@@ -135,6 +249,12 @@ class Pawn : public Piece {
         }
 
         int as_int() const {
+            /*
+            * The pawn has 3 unique states for the purpose of storing a board as a series of integers:
+            * 1. A pawn that has not yet moves (may move forwards 2 or 3 spaces)
+            * 2. A pawn that has _just_ moved forwards 2 or 3 spaces (may be en-passanted)
+            * 3. A pawn that has moved, but cannot be taked by en-passant.
+            */
             if (has_moved) {
                 if (en_passantable) {
                     return 2;
@@ -147,6 +267,7 @@ class Pawn : public Piece {
         }
     
         std::vector<std::pair<int, int>> moves() const {
+            // Seems as good a time as any to mention that the board has X, Y the wrong way round. It's a consistent mistake so causes no errors but readability
             return {{forwards, 0}};
         }
 
@@ -168,7 +289,7 @@ class Pawn : public Piece {
 
 class Rook : public Piece {
     public:
-        Rook(bool is_white) : Piece(is_white) {
+        Rook(bool is_white) : Piece(is_white, 4) {
         }
 
         std::string name() const {
@@ -176,6 +297,9 @@ class Rook : public Piece {
         }
 
         int as_int() const {
+            /*
+            * Rooks are another of the pieces that care if they have moved (for the purpose of castling)
+            */
             if (has_moved) {
                 return 4;
             } else {
@@ -185,12 +309,13 @@ class Rook : public Piece {
         
         std::vector<std::pair<std::pair<int, int>, int>> direction_moves() const {
             return {{{1,0},10},{{0,1},10},{{-1,0},10},{{0,-1},10}};
+            // The board is only 10 sqaures long so a limit of 10 is in practice limitless
         }
 };
 
 class King : public Piece {
     public:
-        King(bool is_white) : Piece(is_white) {}
+        King(bool is_white) : Piece(is_white, 100) {}
 
         std::string name() const {
             return colour_from_bool(is_white) + "King   ";
@@ -210,7 +335,7 @@ class King : public Piece {
 
 class Cleric : public Piece {
     public:
-        Cleric(bool is_white) : Piece(is_white) {}
+        Cleric(bool is_white) : Piece(is_white, 4) {}
 
         std::string name() const {
             return colour_from_bool(is_white) + "Cleric ";
@@ -221,6 +346,7 @@ class Cleric : public Piece {
         }
 
         std::vector<std::pair<int, int>> moves() const {
+            // The cleric can move literally everywhere on the map, so this just adds each square to the 'moves'
             std::vector<std::pair<int, int>> moves = {};
             for (int row = -10; row < 10; row++) {
                 for (int col = -10; col < 10; col ++) {
@@ -228,9 +354,10 @@ class Cleric : public Piece {
                 }
             }
             return moves;
+            // In theory this would be quicker if it contained a hard-coded value for each square. :shrug:
         }
 
-        std::vector<pair<int, int>> takes() const {return {};}
+        std::vector<pair<int, int>> takes() const {return {};} // Default behaviour is to copy the 'moves' function, so this replaces that
 
         std::vector<std::pair<std::pair<int, int>, int>> direction_takes() const {
             return {{{1, 1}, 10}, {{1, -1}, 10}, {{-1, 1}, 10}, {{-1, -1}, 10}};
@@ -239,7 +366,7 @@ class Cleric : public Piece {
 
 class Panda : public Piece {
     public:
-        Panda(bool is_white) : Piece(is_white) {}
+        Panda(bool is_white) : Piece(is_white, 3) {}
 
         std::string name() const {
             return colour_from_bool(is_white) + "Panda  ";
@@ -269,11 +396,13 @@ class Panda : public Piece {
         void tick() {
             immortal = false;
         }
+
+        // Take is applied after tick, so the panda stays immortal for a turn cycle after it takes
 };
 
 class Frog : public Piece {
     public:
-        Frog(bool is_white) : Piece(is_white) {}
+        Frog(bool is_white) : Piece(is_white, 5) {}
 
         std::string name() const {
             return colour_from_bool(is_white) + "Frog   ";
@@ -290,7 +419,7 @@ class Frog : public Piece {
 
 class Dog : public Piece {
     public:
-        Dog(bool is_white) : Piece(is_white) {}
+        Dog(bool is_white) : Piece(is_white, 6) {}
 
          std::string name() const {
             return colour_from_bool(is_white) + "Dog    ";
@@ -307,7 +436,7 @@ class Dog : public Piece {
 
 class Chicken : public Piece {
     public:
-        Chicken(bool is_white) : Piece(is_white) {}
+        Chicken(bool is_white) : Piece(is_white, 4) {}
 
         // NOTE: The chicken's legal moves are calculated by a method in the ChessBoard class becauase of the complexities of the piece.
 
@@ -328,7 +457,7 @@ class Chicken : public Piece {
 
 class Egg : public Piece {
     public:
-        Egg(bool is_white) : Piece(is_white) {
+        Egg(bool is_white) : Piece(is_white, 3) {
             int time_until_hatch = 6;
         }
 
@@ -347,7 +476,7 @@ class Egg : public Piece {
 
 class Blob0 : public Piece {
     public:
-        Blob0(bool is_white) : Piece(is_white) {}
+        Blob0(bool is_white) : Piece(is_white, 5) {}
 
         std::string name() const {
             return colour_from_bool(is_white) + "Blob0  ";
@@ -372,7 +501,7 @@ class Blob0 : public Piece {
 
 class Blob1 : public Piece {
     public:
-        Blob1(bool is_white) : Piece(is_white) {}
+        Blob1(bool is_white) : Piece(is_white, 3) {}
 
         std::string name() const {
             return colour_from_bool(is_white) + "Blob1  ";
@@ -389,7 +518,7 @@ class Blob1 : public Piece {
 
 class Blob2 : public Piece {
     public:
-        Blob2(bool is_white) : Piece(is_white) {}
+        Blob2(bool is_white) : Piece(is_white, 2) {}
 
         std::string name() const {
             return colour_from_bool(is_white) + "Blob2  ";
@@ -406,7 +535,7 @@ class Blob2 : public Piece {
 
 class Blob3 : public Piece {
     public:
-        Blob3(bool is_white) : Piece(is_white) {}
+        Blob3(bool is_white) : Piece(is_white, 1) {}
 
         std::string name() const {
             return colour_from_bool(is_white) + "Blob3  ";
@@ -423,10 +552,11 @@ class Blob3 : public Piece {
 
 class ChessBoard {
     public:
-        array<array<Piece*, 10>, 10> squares;
-        Piece* forced_move;
-        bool white_to_move;
-        std::map<std::pair<int, int>, std::vector<std::pair<int, int>>> moves_map;
+        array<array<Piece*, 10>, 10> squares; // Primary array containing the 'chessboard'
+        Piece* forced_move; // When a piece such as the Dog takes then the board forces it to make another move
+        bool white_to_move; // Tracks whose turn it is
+        std::map<std::pair<int, int>, std::vector<std::pair<int, int>>> moves_map; // Tracks legal moves
+        // For each position on the board, where can the piece in that position move to?
 
         ChessBoard() {
             for (int row = 0; row < 10; row++) {
@@ -440,6 +570,9 @@ class ChessBoard {
         }
 
         ChessBoard* copy_board() const {
+            /*
+            * Creates a duplicate of the board for examining what future boards could do
+            */
             ChessBoard* new_board = new ChessBoard();
             new_board -> set_board_state(this -> arr_board_state());
             new_board -> white_to_move = white_to_move;
@@ -456,7 +589,7 @@ class ChessBoard {
             for (int row = 0; row < 10; row++) {
                 for (int col = 0; col < 10; col++) {
                     if (square_in_position({row, col}) != nullptr) {
-                        delete squares[row][col];
+                        delete squares[row][col]; // Apparently memory management is a real thing (?!?!?!?)
                         squares[row][col] = nullptr;
                     }
                 }
@@ -783,7 +916,7 @@ class ChessBoard {
             return nullptr;
         }
         
-         Piece* square_in_position(std::pair<int, int> position) const {
+        Piece* square_in_position(std::pair<int, int> position) const {
             if (!is_valid_position(position)) {
                 return nullptr;
             }
@@ -1320,7 +1453,9 @@ class ChessBoard {
         }
         
         void move_piece(std::pair<int, int> start_position, std::pair<int, int> end_position) {
-            Piece* start_piece = square_in_position(start_position), end_piece = square_in_position(end_position);
+            Piece* start_piece = square_in_position(start_position);
+            Piece* end_piece = square_in_position(end_position);
+
             if (start_piece == nullptr) {
                 throw std::invalid_argument("That Piece does not exist");
             }
@@ -1594,6 +1729,18 @@ class ChessBoard {
             }
             return false_pair;
         }
+    
+        int material_difference() {
+            int total = 0;
+            for (std::array<Piece*, 10> row : squares) {
+                for (Piece* piece : row) {
+                    if (piece != nullptr) {
+                        total += piece -> value();
+                    }
+                }
+            }
+            return total;
+        }
     };
 
 int main(int argc, char* argv[]) {
@@ -1614,15 +1761,6 @@ int main(int argc, char* argv[]) {
         mate_depth = 3;
     }
 
-    ChessBoard* board = new ChessBoard();
-
-    board -> set_board_state(starting_board_state);
-    board -> white_to_move = white_to_start;
-
-    std::pair<std::pair<int, int>, std::pair<int, int>> starting_move = board -> find_mate_in(mate_depth, board -> white_to_move);
-    cout << starting_move.first.first << starting_move.first.second << "/" << starting_move.second.first << starting_move.second.second;
-    cout << endl;
-
-    return 1;
+    
 }
             
